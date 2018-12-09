@@ -26,6 +26,11 @@ From repository directory:
 on Unix systems: start .shell files in scripts (you should look into them before),
 on Windows system: start .batch files in scripts (you should look into them before).
 
+## Screenshots (of samples models)
+![Projects](images/projects.png?raw=1 "Projects")
+![Models](images/models.png?raw=1 "Project models")
+
+
 ## Library Documentation
 *To get quickly started, please look to few examples in Samples directory of this repository.*
 Revisor library consists of three classes:
