@@ -1,0 +1,17 @@
+# Compiled python modules.
+*.pyc
+
+# Setuptools distribution folder.
+/dist/
+
+# Python egg metadata, regenerated from source files by setuptools.
+revisor/*.egg-info
+
+# path to saved models
+saved_models/
+
+# all server log
+logs.txt
+
+# pickled data
+*.pickle

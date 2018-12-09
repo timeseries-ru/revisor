@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link href='https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900|Material+Icons' rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/themes/prism-twilight.min.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+  <style>svg {max-width: 100% !important;}</style>
+</head>
+<body>
+  <div id="app">
+    <v-app>
+      <v-content v-if="token">
+        <v-toolbar>
+          <v-toolbar-title v-if="!inProject">Projects</v-toolbar-title>
+          <v-toolbar-items>
+            <v-btn v-if="inProject" flat to="/">Go to projects</v-btn>
+          </v-toolbar-items>
+          <v-spacer></v-spacer>
+          <v-btn class="token_source" flat :data-clipboard-text="token" @click="snack = true">Copy token</v-btn>
+          <v-snackbar
+            v-model="snack"
+            :bottom="false"
+            :timeout="4000"
+            :top="true"
+          >
+            Token has been copied to clipboard
+          </v-snackbar>
+          <v-btn flat @click="logout">Sign out</v-btn>
+        </v-toolbar>
+        <router-view></router-view>
+      </v-content>
+      <v-content v-else fill-height align-content-center>
+        <v-layout align-center justify-center row fill-height>
+          <v-card style="width: 70%;" class="pa-3 elevation-3">
+            <v-card-title><h2>Login</h2></v-card-title>
+            <v-card-text>
+              <v-form @keyup.enter.native="do_login">
+                <v-text-field
+                  v-model="name"
+                  label="Name"
+                  required
+                ></v-text-field>
+                <v-text-field
+                  v-model="password"
+                  label="Password"
+                  type="password"
+                  required
+                ></v-text-field>
+              </v-form>
+            </v-card-text>
+            <v-card-actions>
+              <v-btn block color="info" @click="do_login">Login</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-layout>
+      </v-content>
+    </v-app>
+  </div>
+  <template id="main-component">
+    <v-container class="pa-1" style="max-width: 100%;">
+      <v-layout>
+        <v-flex xs6 class="pa-3">
+          <v-card>
+            <v-card-title>
+              Projects
+              <v-spacer></v-spacer>
+              <v-text-field
+                v-model="search"
+                append-icon="search"
+                label="Search"
+                single-line
+                hide-details
+              ></v-text-field>
+            </v-card-title>
+            <v-data-table
+              :headers="headers"
+              :loading="loading"
+              :search="search"
+              :items="projects"
+              :pagination.sync="pagination"
+            >
+              <template slot="items" slot-scope="props">
+                <td @click="selectedProject = props.item">{{ props.item.project_name }}</td>
+                <td @click="selectedProject = props.item" class="text-xs-center">{{ props.item.model_name }}</td>
+              </template>
+              <v-alert slot="no-results" :value="true" color="error" icon="warning">
+                Your search for "{{ search }}" found no results.
+              </v-alert>
+            </v-data-table>
+          </v-card>
+        </v-flex>
+        <v-flex xs6>
+          <v-card v-if="selectedProject" class="ma-3">
+            <v-card-title>
+              <h3>{{selectedProject.data.project.name}}</h3>
+            </v-card-title>
+            <v-card-text class="pa-3">
+              {{selectedProject.data.project.description}}
+            </v-card-text>
+            <v-card-actions class="pa-3">
+              <v-btn :to="'/models/' + selectedProject.data.project.name">Browse models</v-btn>
+              <v-spacer></v-spacer>
+              <v-btn :href="'/dashboard/' + selectedProject.data.project.dashboard_url" target="blank"
+               v-if="selectedProject.data.project.dashboard_url">
+               Dashboard
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+          <v-card v-if="selectedProject" class="ma-3">
+            <v-card-title>
+              <h3>{{selectedProject.data.predictions_model.model.name}}</h3>
+            </v-card-title>
+            <v-card-text class="pa-3">
+              <v-data-table
+                :hide-actions="true"
+                :hide-headers="true"
+                :items="[{
+                  name: 'Version',
+                  value: selectedProject.data.predictions_model.version
+                }, {
+                  name: 'Has dataset',
+                  value: selectedProject.data.predictions_model.has_dataset
+                }]"
+              >
+                <template slot="items" slot-scope="props">
+                  <td>{{ props.item.name }}</td>
+                  <td>{{ props.item.value }}</td>
+                </template>
+              </v-data-table>
+            </v-card-text>
+            <v-card-actions>
+              <v-btn @click="view_dialog = true"
+                v-if="selectedProject.data.predictions_model.model.visualizations.length">View</v-btn>
+              <v-dialog v-model="view_dialog" fullscreen hide-overlay transition="dialog-bottom-transition">
+                <v-card class="pa-3">
+                  <v-toolbar>
+                    <v-toolbar-title>{{ selectedProject.data.predictions_model.model.name }}</v-toolbar-title>
+                    <v-spacer></v-spacer>
+                    <v-btn icon @click="view_dialog = false">
+                      <v-icon>close</v-icon>
+                    </v-btn>
+                  </v-toolbar>
+                  <v-card class="mx-3 mt-3 elevation-3"
+                    v-for="(item, index) in selectedProject.data.predictions_model.model.visualizations"
+                      :key="index">
+                    <v-card-title v-if="item[0].length">{{ item[0] }}</v-card-title>
+                    <v-card-text v-html="item[1]"></v-card-text>
+                  </v-card>
+                </v-card>
+              </v-dialog>
+            </v-card-actions>
+          </v-card>
+        </v-flex>
+      </v-layout>
+    </v-container>
+  </template>
+  <template id="inner-component">
+    <v-container class="pa-1" style="max-width: 100%;">
+      <v-layout>
+        <v-flex xs6>
+          <v-card class="ma-3">
+            <v-card-title v-if="selectedProject">
+              {{selectedProject.name}}
+              <v-spacer></v-spacer>
+              <v-text-field
+                v-model="search"
+                append-icon="search"
+                label="Search"
+                single-line
+                hide-details
+              ></v-text-field>
+            </v-card-title>
+            <v-data-table
+              :headers="headers"
+              :loading="loading"
+              :search="search"
+              :items="models"
+              :pagination.sync="pagination"
+            >
+              <template slot="items" slot-scope="props">
+                <td @click="selectedModel = props.item" class="text-xs-center"
+                  v-if="props.item.version == selectedProject.predictions_model">
+                  <v-chip color="blue" text-color="white">{{ props.item.version }}</v-chip>
+                </td>
+                <td @click="selectedModel = props.item" class="text-xs-center" v-else>
+                  {{ props.item.version }}
+                </td>
+                <td @click="selectedModel = props.item" class="text-xs-center">{{ props.item.model.name }}</td>
+                <td @click="selectedModel = props.item" class="text-xs-center">
+                  <v-chip color="teal" text-color="white" v-if="props.item.has_dataset"
+                    style="min-width: 70px; text-align: center; display:inline-block;">
+                    Yes
+                  </v-chip>
+                  <v-chip text-color="black" v-else
+                    style="min-width: 70px; text-align: center; display:inline-block;">
+                    No
+                  </v-chip>
+                </td>
+                <td @click="selectedModel = props.item" class="text-xs-center">
+                  {{ props.item.model.deploy_time.split('.')[0] }}
+                </td>
+                <td @click="selectedModel = props.item" class="text-xs-center">
+                  <v-chip color="pink" text-color="white" v-if="props.item.changed"
+                    style="min-width: 70px; text-align: center; display:inline-block;">
+                    Yes
+                  </v-chip>
+                  <v-chip text-color="black" v-else
+                    style="min-width: 70px; text-align: center; display:inline-block;">
+                    No
+                  </v-chip>
+                </td>
+              </template>
+              <v-alert slot="no-results" :value="true" color="error" icon="warning">
+                Your search for "{{ search }}" found no results.
+              </v-alert>
+            </v-data-table>
+          </v-card>
+        </v-flex>
+        <v-flex xs6>
+          <v-card class="ma-3">
+            <v-alert v-if="selectedModel && selectedModel.version === selectedProject.predictions_model" class="info" :value="true">
+              This model is used for predictions
+            </v-alert>
+          </v-card>
+          <v-card v-if="selectedModel" class="ma-3">
+            <v-card-title>
+              <h3>{{selectedModel.model.name}} (Version {{selectedModel.version}})</h3>
+            </v-card-title>
+            <v-card-actions class="pa-3">
+              <v-btn @click="code_dialog = true">Code</v-btn>
+              <v-btn @click="view_dialog = true" v-if="selectedModel.model.visualizations.length">View</v-btn>
+              <v-spacer></v-spacer>
+              <v-dialog v-model="code_dialog" fullscreen hide-overlay transition="dialog-bottom-transition">
+                <v-card style="background-color: #303030;">
+                  <v-toolbar>
+                    <v-toolbar-title>{{ selectedModel.class_name }}</v-toolbar-title>
+                    <v-spacer></v-spacer>
+                    <v-btn icon @click="code_dialog = false">
+                      <v-icon>close</v-icon>
+                    </v-btn>
+                  </v-toolbar>
+                  <pre><code class="language-python pa-3"
+                    style="min-width: 100% !important;"
+                    v-html="$options.filters.highlight(selectedModel.implementation)"></code></pre>
+                </v-card>
+              </v-dialog>
+              <v-dialog v-model="view_dialog" fullscreen hide-overlay transition="dialog-bottom-transition">
+                <v-card class="pa-3">
+                  <v-toolbar>
+                    <v-toolbar-title>{{ selectedModel.model.name }}</v-toolbar-title>
+                    <v-spacer></v-spacer>
+                    <v-btn icon @click="view_dialog = false">
+                      <v-icon>close</v-icon>
+                    </v-btn>
+                  </v-toolbar>
+                  <v-card class="mx-3 mt-3 elevation-3"
+                    v-for="(item, index) in selectedModel.model.visualizations" :key="index">
+                    <v-card-title v-if="item[0].length">{{ item[0] }}</v-card-title>
+                    <v-card-text v-html="item[1]"></v-card-text>
+                  </v-card>
+                </v-card>
+              </v-dialog>
+              <v-btn flat @click="settings_dialog = true" class="mx-1">Settings</v-btn>
+              <v-dialog v-model="settings_dialog" fullscreen hide-overlay transition="dialog-bottom-transition">
+                <v-card class="pa-3">
+                  <v-toolbar>
+                    <v-toolbar-title>{{ selectedModel.model.name }}</v-toolbar-title>
+                    <v-spacer></v-spacer>
+                    <v-btn icon @click="settings_dialog = false">
+                      <v-icon>close</v-icon>
+                    </v-btn>
+                  </v-toolbar>
+                  <v-card class="mx-3 mt-3 elevation-3"
+                    v-for="(item, index) in selectedModel.model.settings" :key="index">
+                    <v-card-title>{{ item[0] }}</v-card-title>
+                    <v-card-text v-if="item[1] === 'bool'">
+                      <v-checkbox
+                        :label="item[2] ? 'On' : 'Off'"
+                        v-model="selectedModel.model.settings[index][2]"
+                      ></v-checkbox>
+                    </v-card-text>
+                    <v-card-text v-else-if="item[1] === 'integer'">
+                      <v-text-field hint="Enter an integer" :rules="[integer_rule]" v-model="selectedModel.model.settings[index][2]">
+                      </v-text-field>
+                    </v-card-text>
+                    <v-card-text v-else-if="item[1] === 'float'">
+                      <v-text-field hint="Enter a floating point number" :rules="[float_rule]" v-model="selectedModel.model.settings[index][2]">
+                      </v-text-field>
+                    </v-card-text>
+                    <v-card-text v-else>
+                      <v-text-field :hint="item[1]" v-model="selectedModel.model.settings[index][2]">
+                      </v-text-field>
+                    </v-card-text>
+                  </v-card>
+                  <v-card-actions>
+                    <v-btn block class="ma-3 info" :disabled="save_disabled()" @click="update_settings">Save</v-btn>
+                  </v-card-actions>
+                </v-card>
+              </v-dialog>
+              <v-progress-circular
+                indeterminate
+                color="blue-grey"
+                v-if="fitting"
+              ></v-progress-circular><v-btn @click="fit_model" v-else>Fit</v-btn>
+            </v-card-actions>
+          </v-card>
+          <v-card class="ma-3" v-if="selectedModel &&
+            ((selectedModel.model.imports && selectedModel.model.imports.length) ||
+             (selectedModel.model.messages && selectedModel.model.messages.length))">
+            <v-card-text>
+              <v-tabs>
+                <v-tab v-if="selectedModel.model.messages && selectedModel.model.messages.length">Fit logs</v-tab>
+                <v-tab v-if="selectedModel.model.imports && selectedModel.model.imports.length">Imports</v-tab>
+                <v-tab-item v-if="selectedModel.model.messages && selectedModel.model.messages.length" class="pa-3">
+                  <v-timeline dense>
+                    <v-slide-x-reverse-transition
+                      group
+                      hide-on-leave
+                    >
+                      <v-timeline-item
+                        v-for="(item, index) in selectedModel.model.messages"
+                        :key="index"
+                        :color="item.type === 'text' ? 'info' : (item.type === 'error' ? 'error' : 'success')"
+                        small
+                        fill-dot
+                      >
+                        <v-alert
+                          :value="true"
+                          :color="item.type === 'text' ? 'info' : (item.type === 'error' ? 'error' : 'success')"
+                          text--white
+                        >
+                          <b v-if="item.type === 'score'">{{item.name}}<br/></b>{{item.value}}
+                        </v-alert>
+                      </v-timeline-item>
+                    </v-slide-x-reverse-transition>
+                  </v-timeline>
+                </v-tab-item>
+                <v-tab-item v-if="selectedModel.model.imports && selectedModel.model.imports.length">
+                  <v-data-table
+                    :hide-actions="true"
+                    :headers="[{text: 'Short Name', sortable: false}, {text: 'Module', sortable: false}]"
+                    :items="selectedModel.model.imports"
+                  >
+                    <template slot="items" slot-scope="props">
+                      <td>{{ props.item[0] }}</td>
+                      <td>{{ props.item[1] }}</td>
+                    </template>
+                  </v-data-table>
+                </v-tab-item>
+              </v-tabs>
+            </v-card-text>
+          </v-card>
+          <v-card class="ma-3">
+            <v-btn block color="indigo" dark
+              @click="set_for_predictions"
+              v-if="selectedModel && selectedModel.version !== selectedProject.predictions_model">
+              Set for predictions
+            </v-btn>
+          </v-card>
+        </v-flex>
+      </v-layout>
+    </v-container>
+  </template>
+
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.js"></script>
+  <script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/components/prism-python.min.js"></script>
+  <script src="https://unpkg.com/clipboard@2.0.0/dist/clipboard.min.js"></script>
+  <script>
+    new ClipboardJS('.token_source')
+    Vue.filter('highlight', (code, lang = 'python') => {
+      return Prism.highlight(code, Prism.languages[lang], lang)
+    })
+    const main = Vue.component('main-component', {
+      template: "#main-component",
+      data() {
+        return {
+          view_dialog: false,
+          selectedProject: null,
+          pagination: {rowsPerPage: -1},
+          search: '',
+          projects: [],
+          loading: true,
+          headers: [
+            {text: 'Name', value: 'project_name', sortable: true, align: 'left'},
+            {text: 'Predictions Model', value: 'model_name', sortable: false, align: 'center'}
+          ]
+        }
+      },
+      async mounted() {
+        const projects_data = await window.axios.get('/projects')
+        this.$set(this, 'projects', projects_data.data.map(item => {
+          return {
+            'project_name': item.project.name,
+            'model_name': item.predictions_model.model.name,
+            'data': item
+          }
+        }))
+        this.$set(this, 'loading', false)
+      }
+    })
+    const inner = Vue.component('inner-component', {
+      template: "#inner-component",
+      data() {
+        return {
+          fitting: false,
+          integer_rule: value => isNaN(parseInt(value)) ? 'Not an integer' : true,
+          float_rule: value => isNaN(parseFloat(value)) ? 'Not a floating point number' : true,
+          settings_dialog: false,
+          code_dialog: false,
+          view_dialog: false,
+          selectedProject: null,
+          selectedModel: null,
+          pagination: {rowsPerPage: -1},
+          search: '',
+          models: [],
+          loading: true,
+          headers: [
+            {text: 'Version', value: 'version', sortable: true, align: 'center'},
+            {text: 'Name', value: 'name', sortable: true, align: 'center'},
+            {text: 'Dataset', value: 'has_dataset', sortable: true, align: 'center'},
+            {text: 'Deployed', value: 'deploy_time', sortable: true, align: 'center'},
+            {text: 'Changed', value: 'changed', sortable: true, align: 'center'}
+          ]
+        }
+      },
+      async mounted() {
+        const project_name = location.pathname.split('/').slice(-1).pop()
+        const model_data = await window.axios.get('/projects/' + project_name)
+        this.$set(this, 'selectedProject', model_data.data.project)
+        this.$set(this, 'models', model_data.data.models.map(
+          item => Object.assign(item, item.model)
+        ))
+        this.$set(this, 'loading', false)
+      },
+      methods: {
+        async set_for_predictions() {
+          await window.axios.post('/projects/update', JSON.stringify({
+            project: this.selectedProject.name,
+            version: this.selectedModel.version
+          }))
+          window.location.reload()
+        },
+        save_disabled() {
+          for (let index in this.selectedModel.model.settings) {
+            const setting = this.selectedModel.model.settings[index]
+            if ((setting[1] === 'integer') && isNaN(parseInt(setting[2]))) return true
+            if ((setting[1] === 'float') && isNaN(parseFloat(setting[2]))) return true
+          }
+          return false
+        },
+        async update_settings() {
+          await window.axios.post('/model/update', JSON.stringify({
+            project: this.selectedProject.name,
+            version: this.selectedModel.version,
+            settings: this.selectedModel.model.settings
+          }))
+          window.location.reload()
+        },
+        async fit_model() {
+          this.$set(this, 'fitting', true)
+          await window.axios.post(
+            '/projects/' + this.selectedProject.name +
+            '/fit/' + this.selectedModel.version.toString()
+          )
+          window.location.reload()
+        }
+      }
+    })
+    const routes = [
+      { path: '/', component: main },
+      { path: '/models/:project_name', component: inner }
+    ]
+    const router = new VueRouter({ routes, mode: 'history' })
+    new Vue({
+      router,
+      el: '#app',
+      data() {
+        return {
+          inProject: location.pathname.split('/').length > 2,
+          token: Cookies.get('token'),
+          name: '',
+          password: '',
+          snack: false
+        }
+      },
+      methods: {
+        async do_login() {
+          const result = await window.axios.post('/login', JSON.stringify({
+            'name': this.name,
+            'pass': this.password
+          }))
+          if (result.data && result.data.ok) {
+            Cookies.set('token', result.data.token, {expires: 14})
+            window.location.reload()
+          } else {
+            Cookies.remove('token')
+          }
+        },
+        logout() {
+          Cookies.remove('token')
+          window.location.reload()
+        }
+      },
+      watch: {
+        $route(to, from) {
+          this.$set(this, 'inProject', location.pathname.split('/').length > 2)
+        }
+      }
+    })
+  </script>
+</body>
+</html>
