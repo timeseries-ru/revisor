@@ -5,10 +5,24 @@
   <link href="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/themes/prism-twilight.min.css" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
-  <style>svg {max-width: 100% !important;}</style>
+  <style>
+    svg {max-width: 100% !important;}
+    [v-cloak] > * { display:none; }
+    [v-cloak]::before {
+      content: " ";
+      display: block;
+      position: absolute;
+      background-color: #fafafa;
+      background-size: cover;
+      left: 0;
+      top: 0;
+      right: 0;
+      bottom: 0;
+    }
+  </style>
 </head>
 <body>
-  <div id="app">
+  <div id="app" v-cloak>
     <v-app>
       <v-content v-if="token">
         <v-toolbar>
