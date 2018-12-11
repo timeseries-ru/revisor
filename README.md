@@ -44,6 +44,7 @@ Revisor library consists of three classes:
  -- deploy(*model_instance*, *implementation*, *token*, *with_rewrite*) - deploy model to server with given implementation, where first parameter is instance of class Model (described later), implementation - arbitrary class with mandatory **fit(self, model)** and **predict(self, model, data)** methods. With_rewrite parameter (is False by default) specifies if to rewrite the last deployed model or not (use with caution, only in development mode). The *token* shoud be obtained from the Server (UI). ***ATTENTION***: in Jupyter Notebooks the implementation MUST BE wrapped in function (returning class), otherwise it will not work.
 
 2. **Model**: core class for containing model settings and other metadata (to be reused across) of your implementation. Methods:
+
  -- init(*name*) - create model with name,
 
  -- get_name, set_name(*name*) - get/set name of model,
@@ -63,6 +64,7 @@ Revisor library consists of three classes:
  -- open_file_on_server(*filename*, *open_mode*) - **server only**. Opens file with given mode on server.
 
 3. **Message**: helper class to contain three types of messages can be yielded in fit of model implementation:
+
  -- score(*name*, *value*) - add name-value pair to fit log,
 
  -- text(*value*) - add simple text to fit log,
@@ -78,6 +80,8 @@ Server API allows to take the predictions of deployed models (using defined "pre
 The results should be the predictions.
 
 Default login/password for UI on server is admin/admin. Don't forget to change in users.py file in your server installation directory.
+
+You will need to pass token='your_token' in request Cookies to get authorized on server.
 
 ## Limitations
 1. Certainly, I give NO WARRANTY! Only code.
