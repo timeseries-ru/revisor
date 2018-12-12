@@ -123,29 +123,10 @@
           </v-card>
           <v-card v-if="selectedProject" class="ma-3">
             <v-card-title>
-              <h3>{{selectedProject.data.predictions_model.model.name}}</h3>
+              Predictions model:&nbsp;<b>{{selectedProject.data.predictions_model.model.name}}</b>&nbsp;(version {{selectedProject.data.predictions_model.version}})
             </v-card-title>
-            <v-card-text class="pa-3">
-              <v-data-table
-                :hide-actions="true"
-                :hide-headers="true"
-                :items="[{
-                  name: 'Version',
-                  value: selectedProject.data.predictions_model.version
-                }, {
-                  name: 'Has dataset',
-                  value: selectedProject.data.predictions_model.has_dataset
-                }]"
-              >
-                <template slot="items" slot-scope="props">
-                  <td>{{ props.item.name }}</td>
-                  <td>{{ props.item.value }}</td>
-                </template>
-              </v-data-table>
-            </v-card-text>
-            <v-card-actions>
-              <v-btn @click="view_dialog = true"
-                v-if="selectedProject.data.predictions_model.model.visualizations.length">View</v-btn>
+            <v-card-actions class="pa-3" v-if="selectedProject.data.predictions_model.model.visualizations.length">
+              <v-btn @click="view_dialog = true">View</v-btn>
               <v-dialog v-model="view_dialog" fullscreen hide-overlay transition="dialog-bottom-transition">
                 <v-card class="pa-3">
                   <v-toolbar>
