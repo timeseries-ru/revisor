@@ -29,6 +29,7 @@ on Windows system: start .batch files in scripts (you should look into them befo
 ## Screenshots (of samples models)
 ![Projects](images/projects.png?raw=1 "Projects")
 ![Models](images/models.png?raw=1 "Project models")
+![Dashboard](images/dashboard.png?raw=1 "Sample dashboard")
 
 
 ## Library Documentation
