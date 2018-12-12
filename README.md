@@ -87,8 +87,7 @@ Default login/password for UI on server is admin/admin. Don't forget to change i
 You will need to pass token='your_token' in request Cookies to get authorized on server.
 
 ## Limitations
-1. Certainly, I give NO WARRANTY! Only code.
-2. The service is not suited for high performance tasks. For regular analitycs tasks is better.
+The service is not suited for high performance tasks. For regular analytics tasks is better.
 
 ## Issues and enhancements
 Please fill found issues in this repository Issues Section, and new features requests (or ideas) send as pull requests. Thanks!
