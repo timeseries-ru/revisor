@@ -8,6 +8,16 @@ from falcon_multipart.middleware import MultipartMiddleware
 from executor import fit_implementation, implementation_predict,\
                      bump_version, bump_settings
 
+import xml.etree.cElementTree as etree
+
+def is_svg(source):
+    tag = None
+    try:
+        tag = etree.fromstring(source).tag
+    except etree.ParseError:
+        pass
+    return tag == '{http://www.w3.org/2000/svg}svg'
+
 from users import PROJECTS_USERS
 
 def check_token(request):
@@ -111,27 +121,80 @@ class UIResource:
         with open('main.html', 'r') as htmlfile:
             response.data = htmlfile.read().encode()
 
+visdown_start = """
+<html><head></head><body>
+<div id="contents"></div>
+<div id="original" style="display: none;">
+"""
+
+visdown_end = """
+</div>
+<script src="https://cdn.jsdelivr.net/npm/vega@4.3.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/vega-lite@3.0.0-rc10"></script>
+<script src="https://cdn.jsdelivr.net/npm/vega-embed@3.24.1"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/markdown-it/8.4.2/markdown-it.min.js"></script>
+<script>
+setTimeout(window.location.reload.bind(
+  window.location
+), 60 * 1000)
+function initialization() {
+    var md = window.markdownit();
+    var specs = [];
+    function parse_vega(tokens, idx, options, env, self) {
+      specs.push(JSON.parse(tokens[idx].content));
+      return "<div id='vega_" + specs.length + "'></div>";
+    };
+    md.renderer.rules.fence = parse_vega;
+    document.getElementById(
+        'contents'
+    ).innerHTML =  md.render(
+        document.getElementById('original').innerHTML
+    );
+    for (let index = 0; index < specs.length; ++index)
+        vegaEmbed('#vega_' + (index + 1).toString(), specs[index], {actions: false});
+};
+document.addEventListener('DOMContentLoaded', initialization, false);
+</script>
+</body></html>
+"""
+
+def wrap_image(picture):
+    return """<html><head>
+              <style>
+                * {margin: 0;}
+                svg {max-width: 100%; max-height: 100vh;}
+              </style>
+              </head><body>
+              """ + picture + """
+              <script>
+              setTimeout(window.location.reload.bind(
+                window.location
+              ), 60 * 1000)</script>
+              </body></html>"""
+
 class DashboardResource:
     def on_get(self, request, response, token):
-        image = Serializer().read_project(
+        project = Serializer().read_project(
             os.path.join('saved_models', token)
-        )['dashboard']
+        )
+        if not 'dashboard' in project:
+            return
+        dashboard = project['dashboard']
         response.content_type = falcon.MEDIA_HTML
         response.status = falcon.HTTP_200
-        def wrap(picture):
-            return """<html><head>
-                      <style>
-                        * {margin: 0;}
-                        svg {max-width: 100%; max-height: 100vh;}
-                      </style>
-                      <head><body>
-                      """ + picture + """
-                      <script>
-                      setTimeout(window.location.reload.bind(
-                        window.location
-                      ), 60 * 1000)</script>
-                      </body></html>"""
-        response.data = (wrap(image) if image else '').encode()
+        if not dashboard:
+            return
+        if len(dashboard) == 2:
+            response.data = (
+                visdown_start.replace(
+                    "<head></head>",
+                    "<head><style>" + dashboard[1] + "</style></head>"
+                ) + dashboard[0] + visdown_end
+            ).encode()
+        elif is_svg(dashboard): # we have an image
+            response.data = (
+                wrap_image(dashboard) if dashboard else ''
+            ).encode()
 
 api = falcon.API(middleware=[MultipartMiddleware()])
 api.add_route('/', UIResource())

@@ -87,6 +87,11 @@ class Model():
         self.dashboard = image.getvalue()
         image.close()
 
+    def set_dashboard_report(self, markdown, styles=""):
+        if self.server_path is None:
+            raise Exception('Not on server')
+        self.dashboard = (markdown, styles)
+
     def get_dashboard(self):
         return self.dashboard
 

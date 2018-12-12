@@ -25,10 +25,31 @@ class ModelImplementation():
         model.register_instance_on_server(self)
 
         if model.get_setting_value('visualize'):
-            figure, axes = plt.subplots(1, figsize=(16, 9))
-            axes.scatter(x=data[features[0]], y=data[features[1]], c=y)
-            figure.tight_layout()
-            model.set_dashboard_figure(figure)
+            model.set_dashboard_report("""# Sample report
+
+Hello, ~~*all!*~~ **you**!
+
+This is a markdown-formatted text with vega-lite-chart.
+
+```
+{
+  "width": 1000,
+  "height": 250,
+  "description": "A simple chart with embedded data.",
+  "data": {
+    "values": """ + data[features[1:3] + ['target']].to_json(orient='records') + """
+  },
+  "mark": "point",
+  "encoding": {
+    "x": {"field": \"""" + features[1] + """\", "type": "quantitative"},
+    "y": {"field": \"""" + features[2] + """\", "type": "quantitative"},
+    "color": {"field": "target", "type": "nominal"}
+  }
+}
+```
+
+That's cool.
+""", styles="#contents {max-width: 1000px; margin: 20px auto;}")
 
         yield rv.Message().score('train_score', self.classifier.score(X, y))
         yield rv.Message().text('done')

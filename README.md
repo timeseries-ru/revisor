@@ -59,6 +59,8 @@ Revisor library consists of three classes:
 
  -- set_dashboard(*image*)/set_dashboard_figure(*figure*) - **server only**. Update project's dashboard.
 
+ -- set_dashboard_report(*markdown*, *styles*) - **server only**. Set project's dashboard as markdown text with vega-lite-charts. All fence (triple backticks) code blocks must contain JSON of vega-lite specs. Styles are optional head CSS styles.
+
  -- register_instance_on_server(*model_self*) - **server only**. Registers created model instance on server, which will be used for predictions (until server will not be restarted),
 
  -- open_file_on_server(*filename*, *open_mode*) - **server only**. Opens file with given mode on server.
