@@ -44,6 +44,8 @@ Revisor library consists of three classes:
 
  -- deploy(*model_instance*, *implementation*, *token*, *with_rewrite*) - deploy model to server with given implementation, where first parameter is instance of class Model (described later), implementation - arbitrary class with mandatory **fit(self, model)** and **predict(self, model, data)** methods. With_rewrite parameter (is False by default) specifies if to rewrite the last deployed model or not (use with caution, only in development mode). The *token* shoud be obtained from the Server (UI). ***ATTENTION***: in Jupyter Notebooks the implementation MUST BE wrapped in function (returning class), otherwise it will not work.
 
+ -- set_predictions_version(*token*, *version*), get_predictions_version(*token*) - set/get current version of predictions model.
+
 2. **Model**: core class for containing model settings and other metadata (to be reused across) of your implementation. Methods:
 
  -- init(*name*) - create model with name,

@@ -61,6 +61,16 @@ class ProjectResource:
         )
 
 class VersionResource:
+    def on_get(self, request, response):
+        if not check_token(request):
+            response.media = {'error': True, 'message': 'Not authorized'}
+            return
+        data = json.loads(request.stream.read().decode())
+        result = Serializer().read_project(Serializer().get_folder_name(
+            data['project'] if 'project' in data else ''
+        ))
+        response.media = {"predictions_model": result['predictions_model']} \
+            if 'predictions_model' in result else result
     def on_post(self, request, response):
         if not check_token(request):
             response.media = {'error': True, 'message': 'Not authorized'}

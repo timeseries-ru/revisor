@@ -54,6 +54,15 @@ class Project():
             return {'error': str(data.status_code)}
         return data.json()
 
+    def get_predictions_version(self, token):
+        proxies = self.get_proxies()
+        data = requests.get(self.server_path + '/projects/update', json={
+            'project': self.project_name
+        }, cookies={'token': token}, proxies=proxies)
+        if data.status_code != 200:
+            return {'error': str(data.status_code)}
+        return data.json()
+
     def deploy(self, model, implementation, token, with_rewrite=False):
         dumped_code = inspect.getsource(implementation)
         files = {'': None}
