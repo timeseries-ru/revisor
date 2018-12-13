@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link href='https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900|Material+Icons' rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.15.0/themes/prism-twilight.min.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+  <style>
+    svg {max-width: 100% !important;}
+    [v-cloak] > * { display:none; }
+    [v-cloak]::before {
+      content: " ";
+      display: block;
+      position: absolute;
+      background-color: #fafafa;
+      background-size: cover;
+      left: 0;
+      top: 0;
+      right: 0;
+      bottom: 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="app" v-cloak>
+    <v-app>
+      <v-content fill-height align-content-center>
+        <v-layout align-center justify-center row fill-height>
+          <v-card style="width: 70%;" class="pa-3 elevation-3">
+            <v-card-title><h2>Login</h2></v-card-title>
+            <v-card-text>
+              <v-form @keyup.enter.native="do_login">
+                <v-text-field
+                  v-model="name"
+                  label="Name"
+                  required
+                ></v-text-field>
+                <v-text-field
+                  v-model="password"
+                  label="Password"
+                  type="password"
+                  required
+                ></v-text-field>
+              </v-form>
+            </v-card-text>
+            <v-card-actions>
+              <v-btn block color="info" @click="do_login">Login</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-layout>
+      </v-content>
+    </v-app>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.js"></script>
+  <script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+  <script>
+    new Vue({
+      el: '#app',
+      data() {
+        return {
+          name: '',
+          password: ''
+        }
+      },
+      methods: {
+        async do_login() {
+          const result = await window.axios.post('/login', JSON.stringify({
+            'name': this.name,
+            'pass': this.password,
+            'dashboard': true
+          }))
+          if (result.data && result.data.ok) {
+            Cookies.set('token', result.data.token, {expires: 14})
+            window.location.reload()
+          } else {
+            Cookies.remove('token')
+          }
+        }
+      }
+    })
+  </script>
+</body>
+</html>

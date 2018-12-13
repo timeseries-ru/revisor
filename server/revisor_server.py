@@ -18,7 +18,7 @@ def is_svg(source):
         pass
     return tag == '{http://www.w3.org/2000/svg}svg'
 
-from users import PROJECTS_USERS
+from users import PROJECTS_USERS, DASHBOARD_USERS
 
 def check_token(request):
     if not 'token' in request.cookies:
@@ -26,6 +26,15 @@ def check_token(request):
     token = request.cookies['token']
     for user in PROJECTS_USERS:
         if hashing(PROJECTS_USERS[user]) == token:
+            return True
+    return False
+
+def check_user_token(request):
+    if not 'token' in request.cookies:
+        return False
+    token = request.cookies['token']
+    for user in DASHBOARD_USERS:
+        if hashing(DASHBOARD_USERS[user]) == token:
             return True
     return False
 
@@ -41,6 +50,15 @@ class LoginResource:
                         'token': hashing(data['pass'])
                     }
                     return
+            elif 'dashboard' in data:
+                if data['dashboard']:
+                    user = data['name']
+                    if hashing(DASHBOARD_USERS[user]) == hashing(data['pass']):
+                        response.media = {
+                            'ok': True,
+                            'token': hashing(data['pass'])
+                        }
+                        return
         response.media = {'error': True}
 
 class ProjectResource:
@@ -184,6 +202,13 @@ def wrap_image(picture):
 
 class DashboardResource:
     def on_get(self, request, response, token):
+        if not check_token(request):
+            if not check_user_token(request):
+                response.content_type = falcon.MEDIA_HTML
+                response.status = falcon.HTTP_200
+                with open('login.html', 'r') as htmlfile:
+                    response.data = htmlfile.read().encode()
+                return
         project = Serializer().read_project(
             os.path.join('saved_models', token)
         )

@@ -31,7 +31,7 @@
             <v-btn v-if="inProject" flat to="/">Go to projects</v-btn>
           </v-toolbar-items>
           <v-spacer></v-spacer>
-          <v-btn class="token_source" flat :data-clipboard-text="token" @click="snack = true">Copy token</v-btn>
+          <v-btn class="token_source" flat :data-clipboard-text="token" @click="snack = true">Get token</v-btn>
           <v-snackbar
             v-model="snack"
             :bottom="false"
