@@ -115,7 +115,7 @@ class ModelsResource:
 
 estimators_registry = dict()
 
-def registry_add(project_name, model, sandbox, estimator):
+def registry_add(project_name, model, estimator):
     global estimators_registry
     estimators_registry[project_name] = (model, estimator)
 

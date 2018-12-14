@@ -36,7 +36,8 @@ def get_estimator(path, json, version=None):
     estimator = (sandbox[json['class_name']])()
     if callable(estimator):
         estimator = estimator()
-    return estimator, model, sandbox, version
+    del sandbox
+    return estimator, model, version
 
 def fit_implementation(project_name, version, registry_add):
 
@@ -44,7 +45,7 @@ def fit_implementation(project_name, version, registry_add):
     json = Serializer().read_model(path, version)
 
     if not 'error' in json:
-        estimator, model, sandbox, version = get_estimator(path, json, version)
+        estimator, model, version = get_estimator(path, json, version)
         messages = []
         try:
             producer = estimator.fit(model)
@@ -60,7 +61,7 @@ def fit_implementation(project_name, version, registry_add):
             return {'exception': traceback.format_exc()}
         if model.registered_instance is not None:
             registry_add(
-                project_name, model, sandbox, model.registered_instance
+                project_name, model, model.registered_instance
             )
         return messages if messages is not None else {}
     return {'error': True}
@@ -70,7 +71,7 @@ def implementation_predict(project_name, values, version):
     json = Serializer().read_model(path, version)
 
     if not 'error' in json:
-        estimator, model, _, version = get_estimator(path, json, version)
+        estimator, model, version = get_estimator(path, json, version)
         try:
             result = estimator.predict(model, values)
             Serializer().save_visualizations(path, version, model)
