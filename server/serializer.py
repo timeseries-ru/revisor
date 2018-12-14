@@ -134,7 +134,6 @@ class Serializer():
 
     def save_visualizations(self, path, version, model):
         current = self.read_model(path, version)
-        current['model']['visualizations'] = []
         for description, visualization in model.visualizations:
             current['model']['visualizations'].append(
                 (description, visualization)
