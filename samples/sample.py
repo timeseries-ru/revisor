@@ -35,7 +35,11 @@ This is a markdown-formatted text with vega-lite-chart.
 {
   "width": 1000,
   "height": 250,
-  "description": "A simple chart with embedded data.",
+  "selection": {
+    "grid": {
+      "type": "interval", "bind": "scales"
+    }
+  },
   "data": {
     "values": """ + data[features[1:3] + ['target']].to_json(orient='records') + """
   },
