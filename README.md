@@ -18,6 +18,9 @@ Revisor is a set of (two) tools for prediction models deploy, versioning and man
 
 The solution *requires python 3.6+*. And, also, don't forget to track your original python code with **git** or JupyterLab Git Extension. This project dedicated to deploy-in-the-loop, not to code-in-the-loop.
 
+**Under active development, methods can change**
+
+
 ## Installation
 1. Clone this repo,
 2. Install dependencies, the library itself and start the server.
@@ -25,6 +28,7 @@ The solution *requires python 3.6+*. And, also, don't forget to track your origi
 From repository directory:
 on Unix systems: start .shell files in scripts (you should look into them before),
 on Windows system: start .batch files in scripts (you should look into them before).
+
 
 ## Screenshots (of samples models)
 ![Projects](images/projects.png?raw=1 "Projects")
@@ -56,7 +60,7 @@ Revisor library consists of three classes:
 
  -- set_dataset(*dataframe*) - set pandas.DataFrame object to be available (using model.get_dataset method) on the server, in your implementation. Will uploaded to the server! If current model version has no dataset, **get_dataset will return dataset of the previous version**.
 
- -- add_visualization(*image*, *description*) - **server only method** (can be called in your model implementation only). Add SVG (string) to the set of visualizations of model. Description is optional.
+ -- add_visualization(*image*, *description*) - **server only method** (can be called in your model implementation only). Add SVG (string) to the set of visualizations of model. Description is optional. They will be rewritten every fit call.
 
  -- add_visualization_figure(*figure*, *description*) - **server only**. Convenient method does the same as previous, but converts matplotlib figure to SVG (make sure matplotlib is installed on server).
 
@@ -88,8 +92,10 @@ Default login/password for UI on server is admin/admin. Don't forget to change i
 
 You will need to pass token='your_token' in request Cookies to get authorized on server.
 
+
 ## Limitations
 The service is not suited for high performance tasks. For regular analytics tasks is better.
+
 
 ## Issues and enhancements
 Please fill found issues in this repository Issues Section, and new features requests (or ideas) send as pull requests. Thanks!

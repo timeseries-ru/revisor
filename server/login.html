@@ -73,7 +73,7 @@
             'dashboard': true
           }))
           if (result.data && result.data.ok) {
-            Cookies.set('token', result.data.token, {expires: 14})
+            Cookies.set('token', result.data.token)
             window.location.reload()
           } else {
             Cookies.remove('token')

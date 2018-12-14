@@ -132,8 +132,10 @@ class Serializer():
             self.log_error()
         return {'error': True}
 
-    def save_visualizations(self, path, version, model):
+    def save_visualizations(self, path, version, model, add):
         current = self.read_model(path, version)
+        if not add:
+            current['model']['visualizations'] = []
         for description, visualization in model.visualizations:
             current['model']['visualizations'].append(
                 (description, visualization)

@@ -54,7 +54,7 @@ def fit_implementation(project_name, version, registry_add):
                     messages.append(message)
             else:
                 messages = producer
-            Serializer().save_visualizations(path, version, model)
+            Serializer().save_visualizations(path, version, model, add=False)
             Serializer().save_fit_logs(path, version, messages)
             Serializer().set_dashboard(path, model.get_dashboard())
         except:
@@ -74,7 +74,7 @@ def implementation_predict(project_name, values, version):
         estimator, model, version = get_estimator(path, json, version)
         try:
             result = estimator.predict(model, values)
-            Serializer().save_visualizations(path, version, model)
+            Serializer().save_visualizations(path, version, model, add=True)
             Serializer().set_dashboard(path, model.get_dashboard())
         except:
             return {'exception': traceback.format_exc()}
