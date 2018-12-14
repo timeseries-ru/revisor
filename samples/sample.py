@@ -9,6 +9,16 @@ dataframe = pd.DataFrame(iris_dataset.data, columns=iris_dataset.feature_names)
 dataframe['target'] = iris_dataset.target
 
 class ModelImplementation():
+    def task(self, model):
+        data = model.get_dataset()
+        figure = plt.figure(figsize=(18, 9))
+        plt.plot(data.target)
+        plt.tight_layout()
+        model.add_visualization_figure(figure, 'Updated (minute ago) at %s' % (
+            str(dt.datetime.now())
+        ))
+        plt.close()
+
     def fit(self, model):
         data = model.get_dataset()
 
@@ -78,7 +88,8 @@ for short_name, module in [
     ('linear', 'sklearn.linear_model'),
     ('rv', 'revisor'),
     ('np', 'numpy'),
-    ('plt', 'matplotlib.pyplot')
+    ('plt', 'matplotlib.pyplot'),
+    ('dt', 'datetime')
 ]: model.add_import(short_name, module)
 
 project.set_description("Very basic sample project!")
@@ -95,7 +106,7 @@ model.set_dataset(None)
 model.set_name('ExampleModel')
 model.set_setting('visualize', True)
 assert project.deploy(
-    model, ModelImplementation, token, with_rewrite=False
+    model, ModelImplementation, token, with_rewrite=False, schedule=True
 )['ok']
 
 # reverse check

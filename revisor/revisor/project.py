@@ -63,7 +63,9 @@ class Project():
             return {'error': str(data.status_code)}
         return data.json()
 
-    def deploy(self, model, implementation, token, with_rewrite=False):
+    def deploy(
+        self, model, implementation, token, with_rewrite=False, schedule=False
+    ):
         dumped_code = inspect.getsource(implementation)
         files = {'': None}
         if model.get_dataset() is not None:
@@ -82,6 +84,7 @@ class Project():
                 'implementation': dumped_code,
                 'class_name': implementation.__name__,
                 'has_dataset': model.get_dataset() is not None,
+                'schedule': schedule,
                 'model': {
                     'name': model.name,
                     'settings': model.settings,

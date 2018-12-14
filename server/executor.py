@@ -36,7 +36,6 @@ def get_estimator(path, json, version=None):
     estimator = (sandbox[json['class_name']])()
     if callable(estimator):
         estimator = estimator()
-    del sandbox
     return estimator, model, version
 
 def fit_implementation(project_name, version, registry_add):
@@ -56,7 +55,10 @@ def fit_implementation(project_name, version, registry_add):
                 messages = producer
             Serializer().save_visualizations(path, version, model, add=False)
             Serializer().save_fit_logs(path, version, messages)
-            Serializer().set_dashboard(path, model.get_dashboard())
+            if model.get_dashboard():
+                Serializer().set_dashboard(
+                    path, model.get_dashboard()
+                )
         except:
             return {'exception': traceback.format_exc()}
         if model.registered_instance is not None:
@@ -75,8 +77,37 @@ def implementation_predict(project_name, values, version):
         try:
             result = estimator.predict(model, values)
             Serializer().save_visualizations(path, version, model, add=True)
-            Serializer().set_dashboard(path, model.get_dashboard())
+            if model.get_dashboard():
+                Serializer().set_dashboard(
+                    path, model.get_dashboard()
+                )
         except:
             return {'exception': traceback.format_exc()}
         return result
     return {'error': True}
+
+def implementation_tasks():
+    projects = Serializer().list_projects()
+    for project in projects:
+        if not 'schedule' in project['project']:
+            continue
+        if not project['project']['schedule']:
+            continue
+        version = project['project']['predictions_model']
+        path = Serializer().get_folder_name(project['project']['name'])
+        json = Serializer().read_model(path, version)
+        if not 'error' in json:
+            estimator, model, version = get_estimator(path, json, version)
+            try:
+                if hasattr(estimator, 'task'):
+                    if callable(estimator.task):
+                        result = estimator.task(model)
+                        Serializer().save_visualizations(
+                            path, version, model, add=False
+                        )
+                        if model.get_dashboard():
+                            Serializer().set_dashboard(
+                                path, model.get_dashboard()
+                            )
+            except:
+                Serializer().log_error()

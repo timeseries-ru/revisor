@@ -6,9 +6,11 @@ from serializer import Serializer, hashing
 from falcon_multipart.middleware import MultipartMiddleware
 
 from executor import fit_implementation, implementation_predict,\
-                     bump_version, bump_settings
+                     bump_version, bump_settings, implementation_tasks
 
 import xml.etree.cElementTree as etree
+
+import schedule, threading, time, atexit
 
 def is_svg(source):
     tag = None
@@ -247,3 +249,25 @@ api.add_route('/login', LoginResource())
 
 if not os.path.exists('saved_models'):
     os.makedirs('saved_models')
+
+def job():
+    implementation_tasks()
+
+schedule.every(60).seconds.do(job)
+continuous_run = threading.Event()
+class ScheduleThread(threading.Thread):
+    daemon = True
+    @classmethod
+    def run(cls):
+        while not continuous_run.is_set():
+            schedule.run_pending()
+            time.sleep(5)
+
+continuous_thread = ScheduleThread()
+continuous_thread.start()
+
+def exit_handler():
+    continuous_run.set()
+    continuous_thread.join()
+
+atexit.register(exit_handler)

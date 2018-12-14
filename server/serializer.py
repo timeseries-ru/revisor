@@ -191,7 +191,8 @@ class Serializer():
                 jsonfile.write(json.dumps({
                     'name': request_body['project'],
                     'description': request_body['description'],
-                    'predictions_model': predictions_model
+                    'predictions_model': predictions_model,
+                    'schedule': request_body['schedule']
                 }))
             models_jsons = sorted(
                 glob(os.path.join(folder_path, 'model_*.json'))
