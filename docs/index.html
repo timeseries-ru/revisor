@@ -1,0 +1,170 @@
+<html><head><style>#contents {max-width: 1000px; margin: 20px auto;}</style></head><body>
+<div id="contents"></div>
+<div id="original" style="display: none;">
+# Revisor
+## About
+Revisor is a python-powered server and python library are useful for:
+1. Deploy models code to server and get the predictions,
+2. Control version of model, which is responsible for predictions,
+3. Log and visualize intermediate results and view them on server,
+4. Publish data with markdown- and vega-lite-based dashboards.
+## Installation
+1. Clone the repository: `git clone https://github.com/timeseries-ru/revisor`,
+2. Execute install scripts in appropriate project subfolder, batch or shell (depending on your platform).
+3. Start serve.sh/.bat or set your wsgi/supervisor to control the waitress/gunicorn server instances.
+You may like to change the settings, but in case of gunicorn, don't turn off the `preload`.
+
+Default name/password for access to server UI is admin/admin, for dashboards: user/user. You can change them
+in server/users.py file manually.
+
+## Quickstart example
+Once the server is started and library is installed, you are able to push models to server from code.
+```python
+import revisor as rv
+
+# Wrapper is mandatory when you use revisor in jupyter notebook environment
+def ClassWrapper():
+  class Implementation:
+    def task(self, model):
+      print("Code will print this text every minute")
+    def fit(self, model):
+      import revisor # you'll need to reimport modules
+      print("Code can be called using API or server UI")
+      yield revisor.Message().text("Text to be logged")
+    def predict(self, model, array):
+      print("Code can be called using API")
+      return revered(array)
+  return Implementation
+
+project = rv.Project("Project Name", "http://running.server.url")
+model = rv.Model("Model name")
+
+# Deploy model and implementation to the server with task calls support
+project.deploy(model, ClassWrapper, 'your token from server UI', schedule=True)
+```
+
+Once you pushed your code, the project will be created with first version of model. You can navigate them in UI,
+also with viewing the pushed implementation.
+
+## Library API
+Library API exposes 3 classes: Project, Model and Message. One project contains one or more model versions,
+with independent implementation, logs and visualizations.
+
+Each project has current version of model, which is used by default for predictions and periodical tasks.
+You need to change the current version of model in project explicitly in UI or by code call. Also, each
+project exposes one dashboard, the HTML-page based on markdown and vega-lite charts.
+
+More about methods of each class you may found in repository [README](https://github.com/timeseries-ru/revisor/blob/master/README.md).
+Also it is good to have a look through the [samples code](https://github.com/timeseries-ru/revisor/tree/master/samples).
+
+## Server JSON predict API
+
+Post with Cookie token (='your token') to the url
+
+`
+/projects/Your Project Name/predict/{optionally_give_a_model_version_number}
+`
+
+to call the predict method of your model. The data two ways is passed as JSON array in body.
+
+## Server dashboards
+
+Project's dashboard may contain markdown text, where all contents in triple backticks will be interpreted as
+vega-lite specification of chart. You will need to pass the data in it explicitly.
+
+```markdown
+...use triple backticks
+{
+  "width": 1000,
+  "height": 250,
+  "selection": {
+    "grid": {
+      "type": "interval", "bind": "scales"
+    }
+  },
+  "data": {
+    "values": [{"X": 1, "Y": 2}, {"X": 2, "Y": 4}, {"X": 3, "Y": 1}]
+  },
+  "mark": "point",
+  "encoding": {
+    "x": {"field": "X", "type": "quantitative"},
+    "y": {"field": "Y", "type": "quantitative"}
+  }
+}
+...close triple backticks
+
+```
+
+Will render to next chart.
+```
+{
+  "width": 1000,
+  "height": 250,
+  "selection": {
+    "grid": {
+      "type": "interval", "bind": "scales"
+    }
+  },
+  "data": {
+    "values": [{"X": 1, "Y": 2}, {"X": 2, "Y": 4}, {"X": 3, "Y": 1}]
+  },
+  "mark": "point",
+  "encoding": {
+    "x": {"field": "X", "type": "quantitative"},
+    "y": {"field": "Y", "type": "quantitative"}
+  }
+}
+```
+
+## Server tasks
+Server tasks (if they are) will be executed every minute in one separate thread.
+Hence, be careful with matplotlib for example, cause it's backends may demand main thread to run.
+
+## What's next?
+
+*Start to use Revisor*. It is ok for regular analytical tasks and reports.
+It is not tested on high performance or high load environments though.
+
+You may use it for such cases as:
+1. Getting data from DB and reporting it on dashboard,
+2. Fitting and managing models on server and get its predictions,
+3. Share your data explorations with your team.
+
+Also, if you have an issue found - please fill in it on github.
+
+
+## License
+MIT.
+
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/markdown-it/8.4.2/markdown-it.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vega@4.3.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/vega-lite@3.0.0-rc10"></script>
+<script src="https://cdn.jsdelivr.net/npm/vega-embed@3.24.1"></script>
+<script>
+setTimeout(window.location.reload.bind(
+  window.location
+), 60 * 1000)
+function initialization() {
+    var md = window.markdownit();
+    var specs = [];
+    var original_fence = md.renderer.rules.fence;
+    function parse_vega(tokens, idx, options, env, self) {
+      if (tokens[idx].content[0] === '{') {
+        specs.push(JSON.parse(tokens[idx].content));
+        return "<div id='vega_" + specs.length + "'></div>";
+      }
+      return original_fence(tokens, idx, options, env, self);
+    };
+    md.renderer.rules.fence = parse_vega;
+    document.getElementById(
+        'contents'
+    ).innerHTML =  md.render(
+        document.getElementById('original').innerHTML
+    );
+    for (let index = 0; index < specs.length; ++index)
+        vegaEmbed('#vega_' + (index + 1).toString(), specs[index], {actions: false});
+};
+document.addEventListener('DOMContentLoaded', initialization, false);
+</script>
+</body></html>
