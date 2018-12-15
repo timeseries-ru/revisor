@@ -1,4 +1,6 @@
 # Revisor Library and UI Server
+
+
 Revisor is a set of (two) tools for prediction models deploy, versioning and management:
 1. Revisor python library gives you interface for pushing your models to server,
 2. Revisor server gives the next facilities:
@@ -15,14 +17,12 @@ Revisor is a set of (two) tools for prediction models deploy, versioning and man
 
  -- Change version of model for making predictions.
 
+Quick explanations are on the [Github page](https://timeseries-ru.github.io/revisor/).
 
 The solution *requires python 3.6+*. And, also, don't forget to track your original python code with **git** or JupyterLab Git Extension. This project dedicated to deploy-in-the-loop, not to code-in-the-loop.
 
-**Under active development, methods can change**
-
-
 ## Installation
-1. Clone this repo,
+1. Clone this repository,
 2. Install dependencies, the library itself and start the server.
 
 From repository directory:
