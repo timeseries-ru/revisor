@@ -1,4 +1,4 @@
-<html><head><style>#contents {max-width: 1000px; margin: 20px auto;}</style></head><body>
+<html><head><style>#contents {max-width: 1000px; margin: 20px auto;} img {max-width: 1000px;}</style></head><body>
 <div id="contents"></div>
 <div id="original" style="display: none;">
 # Revisor
@@ -33,7 +33,7 @@ def ClassWrapper():
       yield revisor.Message().text("Text to be logged")
     def predict(self, model, array):
       print("Code can be called using API")
-      return revered(array)
+      return reversed(array)
   return Implementation
 
 project = rv.Project("Project Name", "http://running.server.url")
@@ -45,6 +45,11 @@ project.deploy(model, ClassWrapper, 'your token from server UI', schedule=True)
 
 Once you pushed your code, the project will be created with first version of model. You can navigate them in UI,
 also with viewing the pushed implementation.
+
+## Some screenshots
+![Projects](https://github.com/timeseries-ru/revisor/blob/master/images/projects.png?raw=1 "Projects")
+![Models](https://github.com/timeseries-ru/revisor/blob/master/images/models.png?raw=1 "Project models")
+![Dashboard](https://github.com/timeseries-ru/revisor/blob/master/images/dashboard.png?raw=1 "Sample dashboard")
 
 ## Library API
 Library API exposes 3 classes: Project, Model and Message. One project contains one or more model versions,
@@ -95,7 +100,7 @@ vega-lite specification of chart. You will need to pass the data in it explicitl
 
 ```
 
-Will render to next chart.
+Will render to the next chart.
 ```
 {
   "width": 1000,
