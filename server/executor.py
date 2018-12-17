@@ -53,7 +53,7 @@ def fit_implementation(project_name, version, registry_add):
                     messages.append(message)
             else:
                 messages = producer
-            Serializer().save_visualizations(path, version, model, add=False)
+            Serializer().save_changes(path, version, model, add=False)
             Serializer().save_fit_logs(path, version, messages)
             if model.get_dashboard():
                 Serializer().set_dashboard(
@@ -76,7 +76,7 @@ def implementation_predict(project_name, values, version):
         estimator, model, version = get_estimator(path, json, version)
         try:
             result = estimator.predict(model, values)
-            Serializer().save_visualizations(path, version, model, add=True)
+            Serializer().save_changes(path, version, model, add=True)
             if model.get_dashboard():
                 Serializer().set_dashboard(
                     path, model.get_dashboard()
@@ -102,7 +102,7 @@ def implementation_tasks():
                 if hasattr(estimator, 'task'):
                     if callable(estimator.task):
                         result = estimator.task(model)
-                        Serializer().save_visualizations(
+                        Serializer().save_changes(
                             path, version, model, add=False
                         )
                         if model.get_dashboard():
