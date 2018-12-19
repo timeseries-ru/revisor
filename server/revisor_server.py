@@ -174,7 +174,19 @@ function initialization() {
       specs.push(JSON.parse(tokens[idx].content));
       return "<div id='vega_" + specs.length + "'></div>";
     };
-    md.renderer.rules.fence = parse_vega;
+    function create_csv_download(tokens, idx, options, env, self) {
+      return "<div><a href='data:attachment/csv," + encodeURIComponent(
+        tokens[idx].content.slice(5)
+      ) + "' download='data.csv' style='text-align: center; display: block;'>CSV</a></div>";
+    };
+    function parse_blocks(tokens, idx, options, env, self) {
+        if (tokens[idx].content.slice(0, 5) === 'data:') {
+            return create_csv_download(tokens, idx, options, env, self);
+        } else {
+            return parse_vega(tokens, idx, options, env, self);
+        }
+    }
+    md.renderer.rules.fence = parse_blocks;
     document.getElementById(
         'contents'
     ).innerHTML =  md.render(

@@ -46,7 +46,7 @@ Revisor library consists of three classes:
 
  -- set_description(*description*) - set plain text description for your project (optional)
 
- -- deploy(*model_instance*, *implementation*, *token*, *with_rewrite*, *schedule*) - deploy model to server with given implementation, where first parameter is instance of class Model (described later), implementation - arbitrary class with mandatory **fit(self, model)** and **predict(self, model, data)** methods. *With_rewrite* parameter (is False by default) specifies if to rewrite the last deployed model or not (use with caution, only in development mode). The *token* shoud be obtained from the Server (UI). *schedule* parameter (False by default) when set to True makes server to call **task(self, model)** method of implementation class. It is useful for refreshing something (if you need of course).  ***ATTENTION***: in Jupyter Notebooks the implementation MUST BE wrapped in function (returning class), otherwise it will not work.
+ -- deploy(*model_instance*, *implementation*, *token*, *with_rewrite*, *schedule*) - deploy model to server with given implementation, where first parameter is instance of class Model (described later), implementation - arbitrary class with mandatory **fit(self, model)** and **predict(self, model, data)** methods. *With_rewrite* parameter (is False by default) specifies if to rewrite the last deployed model or not (use with caution, only in development mode). The *token* shoud be obtained from the Server (UI). *schedule* parameter (False by default) when set to True makes server to call **task(self, model)** method of implementation class. It is useful for refreshing something (if you need of course).  ***ATTENTION***: in Jupyter Notebooks the implementation MUST BE wrapped in function (returning class), otherwise it will not work. Also, the method does not work in python console.
 
  -- set_predictions_version(*token*, *version*), get_predictions_version(*token*) - set/get current version of predictions model.
 
@@ -66,7 +66,7 @@ Revisor library consists of three classes:
 
  -- set_dashboard(*image*)/set_dashboard_figure(*figure*) - **server only**. Update project's dashboard.
 
- -- set_dashboard_report(*markdown*, *styles*) - **server only**. Set project's dashboard as markdown text with vega-lite-charts. All fence (triple backticks) code blocks must contain JSON of vega-lite specs. Styles are optional head CSS styles.
+ -- set_dashboard_report(*markdown*, *styles*) - **server only**. Set project's dashboard as markdown text with vega-lite-charts. Fence (triple backticks) code blocks must contain JSON of vega-lite specs or start with 'data:' and then contain plain CSV (to download). Styles are optional head CSS styles.
 
  -- register_instance_on_server(*model_self*) - **server only**. Registers created model instance on server, which will be used for predictions (until server will not be restarted),
 

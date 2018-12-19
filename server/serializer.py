@@ -88,11 +88,14 @@ class Serializer():
                     if os.path.exists(current):
                         return current
             else:
-                return os.path.join(os.path.join(
+                path = os.path.join(os.path.join(
                     folder, 'model_' + str(version) + '.data'
                 ), 'dataset.bz2')
+                if os.path.exists(path):
+                    return path
         except:
             self.log_error()
+        return None
 
     def list_projects(self):
         projects = []

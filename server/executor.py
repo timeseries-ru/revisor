@@ -32,7 +32,8 @@ def get_estimator(path, json, version=None):
     )
     model.settings = json['model']['settings']
     data_path = Serializer().actual_dataset_file(path, version)
-    model.set_dataset(pd.read_pickle(data_path, compression='bz2'))
+    if data_path:
+        model.set_dataset(pd.read_pickle(data_path, compression='bz2'))
     estimator = (sandbox[json['class_name']])()
     if callable(estimator):
         estimator = estimator()
