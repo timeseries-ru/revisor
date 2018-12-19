@@ -88,7 +88,7 @@ Server API allows to take the predictions of deployed models (using defined "pre
 ```
 The results should be the predictions.
 
-Default login/password for UI on server is admin/admin. Don't forget to change in users.py file in your server installation directory.
+Default login/password for UI on server is admin/admin. Don't forget to change in admins.json/users.json file in your server installation directory.
 
 You will need to pass token='your_token' in request Cookies to get authorized on server.
 

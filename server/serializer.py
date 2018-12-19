@@ -135,7 +135,7 @@ class Serializer():
             self.log_error()
         return {'error': True}
 
-    def save_visualizations(self, path, version, model, add):
+    def save_changes(self, path, version, model, add):
         current = self.read_model(path, version)
         if not add:
             current['model']['visualizations'] = []
@@ -143,6 +143,7 @@ class Serializer():
             current['model']['visualizations'].append(
                 (description, visualization)
             )
+        current['model']['settings'] = model.settings
         with open(
             os.path.join(path, 'model_' + str(version) + '.json'), 'w'
         ) as fd:

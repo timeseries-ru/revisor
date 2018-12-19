@@ -14,9 +14,14 @@ class ModelImplementation():
         figure = plt.figure(figsize=(18, 9))
         plt.plot(data.target)
         plt.tight_layout()
-        model.add_visualization_figure(figure, 'Updated (minute ago) at %s' % (
-            str(dt.datetime.now())
+        if not model.get_setting_value('previous update'):
+            model.add_setting(
+                'previous update', 'string', 'never'
+            )
+        model.add_visualization_figure(figure, 'Previously update at %s' % (
+            model.get_setting_value('previous update')
         ))
+        model.set_setting('previous update', str(dt.datetime.now()))
         plt.close()
 
     def fit(self, model):
@@ -109,7 +114,7 @@ assert project.deploy(
     model, ModelImplementation, token, with_rewrite=False, schedule=True
 )['ok']
 
-# reverse check
+# set predictions model (version)
 assert project.set_predictions_version(token, 2)['ok']
 
 messages = project.fit(token, version=1)
