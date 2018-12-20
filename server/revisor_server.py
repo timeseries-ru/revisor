@@ -175,7 +175,7 @@ function initialization() {
       return "<div id='vega_" + specs.length + "'></div>";
     };
     function create_csv_download(tokens, idx, options, env, self) {
-      return "<div><a href='data:attachment/csv," + encodeURIComponent(
+      return "<div><a href='data:text/csv;charset=utf-8,%EF%BB%BF" + encodeURIComponent(
         tokens[idx].content.slice(5)
       ) + "' download='data.csv' style='text-align: center; display: block;'>CSV</a></div>";
     };
