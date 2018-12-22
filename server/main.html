@@ -453,7 +453,14 @@
           await window.axios.post('/model/update', JSON.stringify({
             project: this.selectedProject.name,
             version: this.selectedModel.version,
-            settings: this.selectedModel.model.settings
+            settings: this.selectedModel.model.settings.map(setting => {
+              if (setting[1] === 'integer') {
+                setting[2] = parseInt(setting[2])
+              } else if (setting[1] === 'float') {
+                setting[2] = parseFloat(setting[2])
+              }
+              return setting
+            })
           }))
           window.location.reload()
         },
