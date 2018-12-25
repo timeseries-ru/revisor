@@ -78,6 +78,11 @@ class Model():
             raise ValueError('Attached image is not is SVG format')
         self.dashboard = image
 
+    def set_dashboard_html(self, html):
+        if self.server_path is None:
+            raise Exception('Not on server')
+        self.dashboard = html
+
     def set_dashboard_figure(self, figure):
         if self.server_path is None:
             raise Exception('Not on server')

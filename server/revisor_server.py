@@ -244,6 +244,8 @@ class DashboardResource:
             response.data = (
                 wrap_image(dashboard) if dashboard else ''
             ).encode()
+        else:
+            response.data = dashboard.encode()
 
 api = falcon.API(middleware=[MultipartMiddleware()])
 api.add_route('/', UIResource())
