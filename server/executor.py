@@ -69,7 +69,7 @@ def fit_implementation(project_name, version, registry_add):
         return messages if messages is not None else {}
     return {'error': True}
 
-def implementation_predict(project_name, values, version):
+def implementation_predict(project_name, values, version, registry_add):
     path = Serializer().get_folder_name(project_name)
     json = Serializer().read_model(path, version)
 
@@ -84,6 +84,10 @@ def implementation_predict(project_name, values, version):
                 )
         except:
             return {'exception': traceback.format_exc()}
+        if model.registered_instance is not None:
+            registry_add(
+                project_name, model, model.registered_instance
+            )
         return result
     return {'error': True}
 

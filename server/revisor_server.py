@@ -142,6 +142,10 @@ class PredictResourse:
         else:
             response.media = implementation_predict(
                 name, json.loads(request.stream.read().decode()), version
+                name,
+                json.loads(request.stream.read().decode()),
+                version,
+                registry_add
             )
 
 class UIResource:
