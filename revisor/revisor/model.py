@@ -114,10 +114,13 @@ class Model():
     def on_server(self):
         return self.server_path is not None
 
-    def open_file_on_server(self, name, mode):
+    def open_file_on_server(self, name, mode, current_model_folder=True):
         if self.server_path is None:
             raise Exception('Not on server')
-        return open(os.path.join(self.server_path, name), mode)
+        if current_model_folder:
+            return open(os.path.join(self.server_path, name), mode)
+        else:
+            return open(name, mode)
 
     def register_instance_on_server(self, instance):
         if self.server_path is None:

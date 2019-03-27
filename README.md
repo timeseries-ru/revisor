@@ -70,7 +70,7 @@ Revisor library consists of three classes:
 
  -- register_instance_on_server(*model_self*) - **server only**. Registers created model instance on server, which will be used for predictions (until server will not be restarted),
 
- -- open_file_on_server(*filename*, *open_mode*) - **server only**. Opens file with given mode on server.
+ -- open_file_on_server(*filename*, *open_mode*, *current_model_folder=True*) - **server only**. Opens file with given mode on server. If current_model_folder is False, arbitrary path is allowed.
 
 3. **Message**: helper class to contain three types of messages can be yielded in fit of model implementation:
 
